@@ -25,5 +25,38 @@ from ..common import ERROR, WARN, Issue, iou_xywh, parse_yolo_line  # noqa: F401
 
 
 def run(ds, cfg):
-    # TODO: duyệt từng file nhãn, từng dòng
-    raise NotImplementedError("check label_format chưa làm")
+    c = cfg["label_format"]
+    tol, min_px, max_frac, dup_iou = c["overflow_tol"], c["min_box_px"], c["max_box_frac"], c["dup_box_iou"]
+    issues = []
+
+    def add(sev, code, stem, msg, line, **extra):
+        issues.append(Issue("label_format", sev, code, stem, msg, line, extra))
+
+    for p in ds.label_files():
+        stem = p.stem
+        kept = []                               # các box hợp lệ đã duyệt (để tìm DUP_BOX)
+        for ln, text in ds.read_label_lines(stem) or []:
+            try:
+                cid, x, y, w, h = parse_yolo_line(text)
+            except ValueError as e:
+                add(ERROR, "BAD_FORMAT", stem, f"dòng không đúng định dạng: {e}", ln)
+                continue
+            if not 0 <= cid < len(ds.classes):
+                add(ERROR, "BAD_CLASS_ID", stem, f"id lớp {cid} ngoài 0..{len(ds.classes) - 1}", ln, id=cid)
+                continue
+            if w <= 0 or h <= 0:
+                add(ERROR, "BOX_ZERO", stem, "box rỗng (w hoặc h <= 0)", ln)
+                continue
+            over = max(0.0, -(x - w / 2), -(y - h / 2), (x + w / 2) - 1, (y + h / 2) - 1)
+            if over > tol:
+                add(ERROR, "BOX_OUT_OF_IMAGE", stem, f"box tràn ảnh {over:.4f}", ln, overflow=round(over, 4))
+            box = (x, y, w, h)
+            if any(k == cid and iou_xywh(box, b) > dup_iou for k, b in kept):
+                add(ERROR, "DUP_BOX", stem, "box lặp với một dòng trước đó", ln)
+            kept.append((cid, box))
+            size = ds.image_size(stem)
+            if size and min(w * size[0], h * size[1]) < min_px:
+                add(WARN, "BOX_TINY", stem, f"box quá nhỏ ({min(w * size[0], h * size[1]):.1f}px)", ln)
+            if w * h > max_frac:
+                add(WARN, "BOX_HUGE", stem, f"box chiếm {w * h:.0%} ảnh", ln)
+    return issues

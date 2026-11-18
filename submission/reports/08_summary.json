@@ -1,0 +1,18 @@
+{
+  "verdict": {
+    "decision": "Release",
+    "n_errors": 0,
+    "n_warn_images": 16,
+    "n_images": 202,
+    "warn_ratio": 0.0792,
+    "reasons": [
+      "không còn lỗi bắt buộc; 16/202 ảnh (7.9%) còn cảnh báo, < ngưỡng 10%"
+    ]
+  },
+  "reviewed": 80,
+  "budget": 80,
+  "seconds": 7.1,
+  "exported": "C:\\Users\\DELL INSPIRON 5420\\Documents\\K5-AutoQC-Lab\\submission\\export\\clean_v1",
+  "config_sha1": "59f415bf80fe65e4137bc292cb1db400ba78d300",
+  "review_sim_sha1": "7988ca22827f780a7043a2300490e679a1697154"
+}
