@@ -49,7 +49,7 @@ Chênh mAP50 (clean − raw) = **−0,011**, nhỏ hơn độ lệch giữa các
 
 Giả thuyết giải thích:
 1. Clean bỏ 22 ảnh (10%) nên ít dữ liệu hơn; 20 epoch với model nhỏ thì mất dữ liệu có thể bù lại phần lợi từ bỏ nhãn xấu.
-2. Tập đánh giá có thể chứa chính những lỗi nhãn mà pipeline đã sửa ở tập train, nên model train trên nhãn "sạch" bị lệch so với nhãn val còn lỗi. Ngoài ra, hơn 100 ảnh còn cảnh báo chưa được người thật xem (người duyệt chỉ mô phỏng), nên nhãn clean chưa thật sự sạch.
+2. Tập đánh giá có thể chứa chính những lỗi nhãn mà pipeline đã sửa ở tập train, nên model train trên nhãn "sạch" bị lệch so với nhãn val còn lỗi. Ngoài ra, người duyệt chỉ là mô phỏng (80/102 ảnh trong hàng đợi) và còn 16 ảnh cảnh báo chưa duyệt, nên nhãn clean chưa thật sự sạch.
 
 Hạn chế: chỉ 2 seed, độ lệch raw (0,0002) có thể thấp do tình cờ; cần ≥ 5 seed mới kết luận được.
 
