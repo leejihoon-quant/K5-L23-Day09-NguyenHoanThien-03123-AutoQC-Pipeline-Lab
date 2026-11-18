@@ -29,7 +29,7 @@ Nguồn: `submission/calibration/calibration_report.md` (bộ calib 39 ảnh có
 **Một chỗ calibration có thể đánh lừa:** calib chỉ 39 ảnh, mỗi loại lỗi chỉ 5–8 ca (LOOSE_BOX có 5, WRONG_CLASS 6), nên một ca đổi chiều là F1 nhảy ~0,1–0,2; chênh 0,52 → 0,60 có thể là nhiễu. Ngoài ra `conf = 0,8` được chọn một phần vì nó làm cổng ra Release (chưa chắc tốt hơn cho dữ liệu thật). Với `phash_dist`, mở xem các cặp ảnh bị gộp (img_0186 ↔ img_0061, phash 10: cùng cảnh, bản crop; img_0223 ↔ img_0077, phash 6: cùng ảnh khác tông màu) thì đều là trùng thật, nên 10 hợp lý; nhưng cặp img_0186 nằm sát ngưỡng, và mức 6 sẽ bỏ sót nó.
 
 ## 4. Cửa chặn và điều pipeline KHÔNG bắt được
-(a) Chạy `python -m pipeline.run --budget 0 --reports work/rep_nb --export-dir work/exp_nb` (không người duyệt): kết luận **REWORK** ("còn 6 lỗi bắt buộc chưa sửa được"), mã thoát **20**, log ghi "KHÔNG xuất: còn lỗi bắt buộc"; thư mục `work/exp_nb` không được tạo. 6 lỗi này là 6 ảnh `MISSING_LABEL_FILE`. Cổng chặn đúng: lỗi bắt buộc không bị che bởi bất kỳ ngưỡng nào.
+(a) Chạy `python -m pipeline.run --budget 0 --reports work/rep_nb --export-dir work/exp_nb`: kết luận **REWORK** ("còn 6 lỗi bắt buộc chưa sửa được"), mã thoát **20**, log ghi "KHÔNG xuất: còn lỗi bắt buộc"; thư mục `work/exp_nb` không được tạo. 6 lỗi này là 6 ảnh `MISSING_LABEL_FILE`. Cổng chặn đúng: lỗi bắt buộc không bị che bởi bất kỳ ngưỡng nào.
 
 (b) Điểm mù có bằng chứng:
 1. **Box lỏng nhẹ:** trên calib, recall `POSSIBLE_LOOSE_BOX` chỉ 0,20 ở `conf = 0,8` (0,40 ở 0,25), vì ngưỡng `iou_loose = 0,5` bỏ qua box lệch vừa phải (IoU 0,5–0,7).
