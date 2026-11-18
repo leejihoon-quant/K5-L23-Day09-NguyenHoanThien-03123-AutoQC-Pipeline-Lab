@@ -38,7 +38,20 @@ Nguồn: `submission/calibration/calibration_report.md` (bộ calib 39 ảnh có
 4. **Ảnh nền hay thiếu nhãn:** 12 ảnh `EMPTY_LABEL` chỉ được cảnh báo, máy không phân biệt được.
 
 ## 5. Train: raw vs clean (tùy chọn, chấm riêng)
-**Chưa chạy.** Lý do: phần tùy chọn, cần Colab/GPU; ưu tiên hoàn tất phần lõi.
+Cấu hình: yolo26n, 20 epoch, batch 16, imgsz 640, seed 0 và 1, chạy trên Colab T4 (device 0). Raw = 224 ảnh, clean = 202 ảnh (`clean_v1`). Kết quả trong `submission/results/` (`comparison.md`, `comparison.png`).
+
+| biến thể | mAP50 (TB ± độ lệch) | mAP50-95 | precision | recall |
+|---|---|---|---|---|
+| raw | 0,726 ± 0,000 | 0,512 ± 0,004 | 0,764 ± 0,061 | 0,649 ± 0,028 |
+| clean | 0,715 ± 0,019 | 0,492 ± 0,014 | 0,795 ± 0,018 | 0,606 ± 0,004 |
+
+Chênh mAP50 (clean − raw) = **−0,011**, nhỏ hơn độ lệch giữa các seed của clean (0,019). Kết luận trung thực: **không chứng minh được dữ liệu sạch giúp mAP tốt hơn**; với 2 seed, chênh này nằm trong nhiễu. Clean cho precision cao hơn và ổn định hơn (0,795 so với 0,764) nhưng recall thấp hơn (0,606 so với 0,649).
+
+Giả thuyết giải thích:
+1. Clean bỏ 22 ảnh (10%) nên ít dữ liệu hơn; 20 epoch với model nhỏ thì mất dữ liệu có thể bù lại phần lợi từ bỏ nhãn xấu.
+2. Tập đánh giá có thể chứa chính những lỗi nhãn mà pipeline đã sửa ở tập train, nên model train trên nhãn "sạch" bị lệch so với nhãn val còn lỗi. Ngoài ra, hơn 100 ảnh còn cảnh báo chưa được người thật xem (người duyệt chỉ mô phỏng), nên nhãn clean chưa thật sự sạch.
+
+Hạn chế: chỉ 2 seed, độ lệch raw (0,0002) có thể thấp do tình cờ; cần ≥ 5 seed mới kết luận được.
 
 ## 6. Quyết định và ghi chú AI
 (a) **Quyết định cuối: Release** (`clean_v1`, 202 ảnh). Điều kiện cần lưu ý: "người duyệt" là mô phỏng (`scripts/human_review_sim.py`, 80 ảnh); trong thực tế phải có người thật duyệt, và nếu hạ `conf` về 0,5 thì pipeline ra Hold (44/202 ảnh cảnh báo chưa duyệt, cần thêm khoảng 40 ảnh duyệt hoặc ngân sách lớn hơn để về Release).
